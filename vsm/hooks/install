@@ -53,12 +53,14 @@ diamond_4.0_all.deb"
 
 vsm_dep_repo=/opt/vsm-dep-repo
 mkdir -p ${vsm_dep_repo}
+cd ${vsm_dep_repo}
 prefix_dl="https://raw.githubusercontent.com/01org/vsm-dependencies/2.1/ubuntu14/"
 for package in ${packages}; do
     dl=${prefix_dl}${package}
-    wget ${dl} -O ${vsm_dep_repo}
+    wget ${dl}
     juju-log "**********wget ${package%%_*}"
 done
+cd ${TOPDIR}
 
 exec ./hooks/install.real install_dpkg_dev
 
