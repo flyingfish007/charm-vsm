@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+import sys
+import utils
+from charmhelpers.fetch import (
+    apt_install,
+    apt_update,
+    add_source
+)
+
+
+# Add archive source of provided
+add_source(utils.config_get('source'), utils.config_get('key'))
+apt_update()
+
+apt_install(['debconf-utils', 'python-mysqldb', 'uuid', 'pwgen', 'dnsutils'])
+
+def install_dpkg_dev():
+    # install dpkg-dev to dpkg-scanpackages vsm-dep-repo
+    apt_install(['dpkg-dev'])
+    utils.juju_log('info', '**********install dpkg-dev')
+
+def install_vsm():
+    # install vsm on controller or agent node
+    apt_update()
+    role = utils.config_get('role')
+    if role == "controller":
+        packages = ['vsm', 'vsm-dashboard', 'python-vsmclient']
+        utils.juju_log('info', '**********install vsm vsm-dashboard python-vsmclient')
+    elif role == "agent":
+        packages = ['vsm']
+        utils.juju_log('info', '**********install vsm')
+
+
+action = sys.argv[1]
+if action == "install_dpkg_dev":
+    install_dpkg_dev()
+elif action == "install_vsm":
+    install_vsm()

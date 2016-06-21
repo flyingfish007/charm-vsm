@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+juju-log "********vsm_charm database-relation-changed begin"
+
+db_user=`relation-get user`
+db_db=`relation-get database`
+db_pass=`relation-get password`
+db_host=`relation-get private-address`
+juju-log "********vsm_charm database-relation-changed db_user: $db_user"
+juju-log "********vsm_charm database-relation-changed db_db: $db_db"
+juju-log "********vsm_charm database-relation-changed db_pass: $db_pass"
+juju-log "********vsm_charm database-relation-changed db_host: $db_host"
+if [ -z "$db_db" ]; then
+  juju-log "No database information sent yet. Silently exiting"
+  exit 0
+fi
+juju-log "********vsm_charm database-relation-changed here"
+
+juju-log "********vsm_charm database-relation-changed end"
