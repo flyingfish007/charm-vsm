@@ -8,9 +8,9 @@ tags:
   # https://jujucharms.com/docs/stable/authors-charm-metadata
   - storage
 requires:
-  database:
-    interface: mysql
-  keystone:
-    interface: keystone-credentials
-  queue:
+  shared-db:
+    interface: mysql-shared
+  identity-service:
+    interface: keystone
+  amqp:
     interface: rabbitmq

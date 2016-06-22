@@ -15,4 +15,11 @@ options:
     type: string
     default: "controller"
     description: "The role of vsm node, controller or agent"
-
+  database-user:
+    default: vsm
+    type: string
+    description: Username to request database access.
+  database:
+    default: vsm
+    type: string
+    description: Database to request access.
