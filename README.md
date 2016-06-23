@@ -1,2 +1,2 @@
-# charms
-All charms set
+# charm-vsm
+The juju charm for virtual-storage-manager(vsm).
