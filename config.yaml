@@ -23,3 +23,25 @@ options:
     default: vsm
     type: string
     description: RabbitMQ virtual host to request access on rabbitmq-server.
+  database-user:
+    default: vsm
+    type: string
+    description: Username to request database access.
+  database:
+    default: vsm
+    type: string
+    description: Database to request access.
+  enabled-services:
+    default: all
+    type: string
+    description: |
+      If splitting vsm services between units, define which services
+      to install and configure.
+  api-listening-port:
+    default: 8778
+    type: int
+    description: VSM API listening port.
+  region:
+    default: RegionOne
+    type: string
+    description: VSM Region
