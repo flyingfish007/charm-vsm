@@ -15,11 +15,11 @@ options:
     type: string
     default: "controller"
     description: "The role of vsm node, controller or agent"
-  database-user:
+  rabbit-user:
     default: vsm
     type: string
-    description: Username to request database access.
-  database:
+    description: Username to request access on rabbitmq-server.
+  rabbit-vhost:
     default: vsm
     type: string
-    description: Database to request access.
+    description: RabbitMQ virtual host to request access on rabbitmq-server.

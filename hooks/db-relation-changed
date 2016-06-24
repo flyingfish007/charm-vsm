@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+juju-log "**********db-relation-changed begin"
+
+database=`relation-get database`
+user=`relation-get user`
+password=`relation-get password`
+host=`relation-get private-address`
+
+juju-log "**********mysql database is ${database}"
+juju-log "**********mysql user is ${user}"
+juju-log "**********mysql password is ${password}"
+juju-log "**********mysql host is ${host}"
+
+if [ -z "$database" ] ; then
+	exit 0
+fi
+
+cp /etc/vsm/vsm.conf.sample /etc/vsm/vsm.conf
+vsm_conf=/etc/vsm/vsm.conf
+sed -i "s/^sql_connection = *.*/sql_connection = mysql:\/\/${user}:${password}@${host}\/${database}?charset=utf8/g" ${vsm_conf}
+
+vsm-manage db sync
+juju-log "**********vsm-manage db sync successfully"

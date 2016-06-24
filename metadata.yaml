@@ -8,8 +8,8 @@ tags:
   # https://jujucharms.com/docs/stable/authors-charm-metadata
   - storage
 requires:
-  shared-db:
-    interface: mysql-shared
+  db:
+    interface: mysql
   identity-service:
     interface: keystone
   amqp:
