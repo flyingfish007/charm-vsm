@@ -19,9 +19,15 @@ from charmhelpers.core.hookenv import (
 
 
 TEMPLATES = 'templates/'
-
 VSM_CONF_DIR = "/etc/vsm"
 VSM_CONF = '%s/vsm.conf' % VSM_CONF_DIR
+PACKAGE_VSM = 'vsm'
+PACKAGE_VSM_DASHBOARD = 'vsm-dashboard'
+PACKAGE_PYTHON_VSMCLIENT = 'python-vsmclient'
+VSM_PACKAGES = [PACKAGE_VSM,
+                PACKAGE_VSM_DASHBOARD,
+                PACKAGE_PYTHON_VSMCLIENT]
+
 
 BASE_RESOURCE_MAP = OrderedDict([
     (VSM_CONF, {

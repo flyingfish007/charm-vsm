@@ -4,33 +4,46 @@ import sys
 import utils
 
 from vsm_utils import (
-    register_configs,
-    VSM_CONF,
+    juju_log,
     migrate_database,
+    register_configs,
     service_enabled,
-    juju_log
+    VSM_PACKAGES,
+    VSM_CONF
 )
 
 from charmhelpers.core.hookenv import (
-    Hooks,
     config,
     network_get_primary_address,
-    unit_get,
     relation_set,
-    UnregisteredHookError
+    unit_get,
+    UnregisteredHookError,
+    Hooks
 )
 
 from charmhelpers.contrib.openstack.ip import (
     canonical_url,
-    PUBLIC, INTERNAL, ADMIN
+    ADMIN,
+    INTERNAL,
+    PUBLIC
 )
 
-from charmhelpers.contrib.openstack.utils import sync_db_with_multi_ipv6_addresses
+from charmhelpers.fetch import (
+    apt_install,
+    apt_update
+)
 
 hooks = Hooks()
 
 CONFIGS = register_configs()
 
+
+@hooks.hook('install.real')
+def install():
+    juju_log('**********install.real')
+    apt_update()
+    apt_install(VSM_PACKAGES)
+    juju_log('**********finished to install vsm vsm-dashboard python-vsmclient')
 
 @hooks.hook('shared-db-relation-joined')
 def db_joined():
