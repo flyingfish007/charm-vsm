@@ -12,13 +12,7 @@ from charmhelpers.fetch import (
 add_source(utils.config_get('source'), utils.config_get('key'))
 apt_update()
 
-# install vsm on controller or agent node
-role = utils.config_get('role')
-if role == "controller":
-    packages = ['vsm', 'vsm-dashboard', 'python-vsmclient']
-    apt_install(packages)
-    utils.juju_log('info', '**********install vsm vsm-dashboard python-vsmclient')
-elif role == "agent":
-    packages = ['vsm']
-    apt_install(packages)
-    utils.juju_log('info', '**********install vsm')
+# install vsm on controller node
+packages = ['vsm', 'vsm-dashboard', 'python-vsmclient']
+apt_install(packages)
+utils.juju_log('info', '**********install vsm vsm-dashboard python-vsmclient')

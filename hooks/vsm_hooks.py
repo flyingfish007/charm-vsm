@@ -35,20 +35,16 @@ CONFIGS = register_configs()
 @hooks.hook('shared-db-relation-joined')
 def db_joined():
     juju_log('**********shared-db-relation-joined')
-    if config('prefer-ipv6'):
-        sync_db_with_multi_ipv6_addresses(config('database'),
-                                          config('database-user'))
-    else:
-        try:
-            # NOTE: try to use network spaces
-            host = network_get_primary_address('shared-db')
-        except NotImplementedError:
-            # NOTE: fallback to private-address
-            host = unit_get('private-address')
-        conf = config()
-        relation_set(database=conf['database'],
-                     username=conf['database-user'],
-                     hostname=host)
+    try:
+        # NOTE: try to use network spaces
+        host = network_get_primary_address('shared-db')
+    except NotImplementedError:
+        # NOTE: fallback to private-address
+        host = unit_get('private-address')
+    conf = config()
+    relation_set(database=conf['database'],
+                 username=conf['database-user'],
+                 hostname=host)
 
 
 @hooks.hook('shared-db-relation-changed')
@@ -58,15 +54,19 @@ def db_changed():
     if 'shared-db' not in CONFIGS.complete_contexts():
         juju_log('shared-db relation incomplete. Peer not ready?')
         return
+    juju_log('**********CONFIGS is %s' % str(CONFIGS))
     CONFIGS.write(VSM_CONF)
     migrate_database()
+
 
 @hooks.hook('amqp-relation-joined')
 def amqp_joined(relation_id=None):
     juju_log('**********amqp-relation-joined')
+    juju_log('**********relation_id is %s' % str(relation_id))
     conf = config()
     relation_set(relation_id=relation_id,
                  username=conf['rabbit-user'], vhost=conf['rabbit-vhost'])
+
 
 @hooks.hook('amqp-relation-changed')
 def amqp_changed():
@@ -74,6 +74,7 @@ def amqp_changed():
     if 'amqp' not in CONFIGS.complete_contexts():
         juju_log('amqp relation incomplete. Peer not ready?')
         return
+    juju_log('**********CONFIGS is %s' % str(CONFIGS))
     CONFIGS.write(VSM_CONF)
 
 
@@ -97,17 +98,19 @@ def identity_joined(rid=None):
         config('api-listening-port')
     )
     settings = {
-        'region': config('region'),
-        'service': 'vsm',
-        'public_url': public_url,
-        'internal_url': internal_url,
-        'admin_url': admin_url,
+        'region': None,
+        'service': None,
+        'public_url': None,
+        'internal_url': None,
+        'admin_url': None,
         'vsm_region': config('region'),
         'vsm_service': 'vsm',
         'vsm_public_url': public_url,
         'vsm_internal_url': internal_url,
         'vsm_admin_url': admin_url,
     }
+    juju_log("**********settings is %s" % str(settings))
+    juju_log("**********relation_id is %s" % str(rid))
     relation_set(relation_id=rid, **settings)
 
 
@@ -117,6 +120,8 @@ def identity_changed():
     if 'identity-service' not in CONFIGS.complete_contexts():
         juju_log('identity-service relation incomplete. Peer not ready?')
         return
+    juju_log('**********CONFIGS.write(VSM_CONF)')
+    juju_log('**********CONFIGS is %s' % str(CONFIGS))
     CONFIGS.write(VSM_CONF)
 
 

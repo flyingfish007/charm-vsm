@@ -1,20 +1,4 @@
 options:
-  string-option:
-    type: string
-    default: "Default Value"
-    description: "A short description of the configuration option"
-  boolean-option:
-    type: boolean
-    default: False
-    description: "A short description of the configuration option"
-  int-option:
-    type: int
-    default: 9001
-    description: "A short description of the configuration option"
-  role:
-    type: string
-    default: "controller"
-    description: "The role of vsm node, controller or agent"
   rabbit-user:
     default: vsm
     type: string
@@ -45,3 +29,42 @@ options:
     default: RegionOne
     type: string
     description: VSM Region
+  # Network configuration options
+  # by default all access is over 'private-address'
+  os-admin-network:
+    type: string
+    default:
+    description: |
+      The IP address and netmask of the OpenStack Admin network (e.g.,
+      192.168.0.0/24)
+      .
+      This network will be used for admin endpoints.
+  os-internal-network:
+    type: string
+    default:
+    description: |
+      The IP address and netmask of the OpenStack Internal network (e.g.,
+      192.168.0.0/24)
+      .
+      This network will be used for internal endpoints.
+  os-public-network:
+    type: string
+    default:
+    description: |
+      The IP address and netmask of the OpenStack Public network (e.g.,
+      192.168.0.0/24)
+      .
+      This network will be used for public endpoints.
+  os-public-hostname:
+    type: string
+    default:
+    description: |
+      The hostname or address of the public endpoints created for vsm
+      in the keystone identity provider.
+
+      This value will be used for public endpoints. For example, an
+      os-public-hostname set to 'vsm.example.com' with ssl enabled will
+      create two public endpoints for cinder:
+
+      https://vsm.example.com:443/v1/$(tenant_id)s and
+      https://vsm.example.com:443/v2/$(tenant_id)s

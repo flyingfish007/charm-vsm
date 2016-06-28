@@ -30,8 +30,7 @@ BASE_RESOURCE_MAP = OrderedDict([
                      context.IdentityServiceContext(
                          service='vsm',
                          service_user='vsm')],
-        'services': ['vsm-api', 'vsm-scheduler', 'vsm-conductor',
-                     'vsm-agent', 'vsm-physical']
+        'services': ['vsm-api', 'vsm-scheduler', 'vsm-conductor']
     }),
 ])
 
@@ -66,14 +65,8 @@ def restart_map():
     :returns: dict: A dictionary mapping config file to lists of services
                     that should be restarted when file changes.
     '''
-    role = utils.config_get('role')
-
-    if role == "controller":
-        return OrderedDict([(cfg, ['vsm-api', 'vsm-scheduler', 'vsm-conductor'])
-                            for cfg, v in resource_map().iteritems()])
-    elif role == "agent":
-        return OrderedDict([(cfg, ['vsm-agent', 'vsm-physical'])
-                            for cfg, v in resource_map().iteritems()])
+    return OrderedDict([(cfg, ['vsm-api', 'vsm-scheduler', 'vsm-conductor'])
+                        for cfg, v in resource_map().iteritems()])
 
 # NOTE(jamespage): Retry deals with sync issues during one-shot HA deploys.
 #                  mysql might be restarting or suchlike.
