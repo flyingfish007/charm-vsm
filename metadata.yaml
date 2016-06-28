@@ -1,5 +1,5 @@
-name: vsm
-summary: Intel Virtual Storage Manager for Ceph
+name: vsm-controller
+summary: Intel Virtual Storage Manager for Ceph(vsm controller)
 maintainer: intel <intel@zhubx-pc>
 description: |
   Virtual Storage Manager (VSM) is a web-based management application for Ceph storage systems. VSM creates, manages, and monitors a Ceph cluster. VSM simplifies the creation and day-to-day management of a Ceph cluster for cloud and data center storage administrators.
