@@ -18,7 +18,7 @@ from charmhelpers.core.hookenv import (
 )
 
 
-TEMPLATES = 'templates/'
+TEMPLATES = '../templates/'
 VSM_CONF_DIR = "/etc/vsm"
 VSM_CONF = '%s/vsm.conf' % VSM_CONF_DIR
 PACKAGE_VSM = 'vsm'
