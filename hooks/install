@@ -5,6 +5,7 @@ TOPDIR=$(cd $(dirname "$0") && pwd)
 
 juju-log "********hook install begin"
 
+(
 packages="alembic_0.6.5+ds-1~cloud2_all.deb
 keystone_1%253a2014.2.2-0ubuntu1%7Ecloud0_all.deb
 python-alembic_0.6.5+ds-1~cloud2_all.deb
@@ -60,7 +61,7 @@ for package in ${packages}; do
     wget ${dl}
     juju-log "**********wget ${package%%_*}"
 done
-cd ${TOPDIR}
+)
 
 declare -a DEPS=('dpkg-dev')
 
@@ -76,6 +77,7 @@ for dep in ${DEPS[@]}; do
     check_and_install ${dep}
 done
 
+(
 cd /opt
 dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
 cat <<"EOF" >/etc/apt/sources.list.d/vsm-dep.list
@@ -93,8 +95,8 @@ mv /opt/2.1.0-336/vsmrepo /opt
 cat <<"EOF" >/etc/apt/sources.list.d/vsm.list
 deb file:///opt vsmrepo/
 EOF
-cd ${TOPDIR}
+)
 
-exec ./install.real
+exec ./hooks/install.real
 
 juju-log "********hook install end"
