@@ -1,6 +1,7 @@
 from copy import deepcopy
 from collections import OrderedDict
 import subprocess
+import ConfigParser
 
 from charmhelpers.contrib.openstack import (
     templating,
@@ -97,3 +98,19 @@ def service_enabled(service):
 
 def juju_log(msg):
     log('[vsm] %s' % msg)
+
+# TODO: refactor to use unit storage or related data
+def auth_token_config(setting):
+    """
+    Returns currently configured value for setting in vsm.conf's
+    authtoken section, or None.
+    """
+    config = ConfigParser.RawConfigParser()
+    config.read('/etc/vsm/vsm.conf')
+    try:
+        value = config.get('keystone_authtoken', setting)
+    except:
+        return None
+    if value.startswith('%'):
+        return None
+    return value

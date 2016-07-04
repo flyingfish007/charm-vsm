@@ -4,6 +4,7 @@ import sys
 import utils
 
 from vsm_utils import (
+    auth_token_config,
     juju_log,
     migrate_database,
     register_configs,
@@ -136,6 +137,34 @@ def identity_changed():
     juju_log('**********CONFIGS.write(VSM_CONF)')
     juju_log('**********CONFIGS is %s' % str(CONFIGS))
     CONFIGS.write(VSM_CONF)
+
+
+@hooks.hook('vsm-agent-relation-joined')
+def agent_joined(rid=None):
+    rel_settings = {}
+    rel_settings.update(keystone_agent_settings())
+    relation_set(relation_id=rid, **rel_settings)
+
+
+@hooks.hook('vsm-agent-relation-changed')
+def agent_changed():
+    return
+
+
+def keystone_agent_settings():
+    ks_auth_config = _auth_config()
+    rel_settings = {}
+    rel_settings.update(ks_auth_config)
+    return rel_settings
+
+def _auth_config():
+    '''Grab all KS auth token config from vsm.conf, or return empty {}'''
+    cfg = {
+        'service_host': auth_token_config('identity_uri').split('/')[2].split(':')[0],
+        'admin_user': auth_token_config('admin_user'),
+        'admin_password': auth_token_config('admin_password')
+    }
+    return cfg
 
 
 if __name__ == '__main__':
