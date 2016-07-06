@@ -19,6 +19,7 @@ from charmhelpers.core.hookenv import (
     charm_dir,
     config,
     network_get_primary_address,
+    open_port,
     relation_set,
     unit_get,
     UnregisteredHookError,
@@ -223,6 +224,7 @@ def config_vsm_controller():
         subprocess.check_call(['sudo', 'service', 'vsm-scheduler', 'restart'])
         subprocess.check_call(['sudo', 'service', 'vsm-conductor', 'restart'])
         subprocess.check_call(['sudo', 'service', 'apache2', 'restart'])
+        open_port('443')
 
 
 if __name__ == '__main__':

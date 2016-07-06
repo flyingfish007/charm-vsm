@@ -2,7 +2,4 @@
 set -e
 
 juju-log "********vsm_charm start begin"
-
-open-port 443
-
 juju-log "********vsm_charm start end"
