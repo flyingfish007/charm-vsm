@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import subprocess
 import utils
 
 from vsm_utils import (
@@ -9,6 +10,7 @@ from vsm_utils import (
     migrate_database,
     register_configs,
     service_enabled,
+    PRE_INSTALL_PACKAGES,
     VSM_PACKAGES,
     VSM_CONF
 )
@@ -35,6 +37,7 @@ from charmhelpers.contrib.openstack.ip import (
 )
 
 from charmhelpers.fetch import (
+    add_source,
     apt_install,
     apt_update
 )
@@ -70,6 +73,10 @@ def install():
     apt_update()
     apt_install(VSM_PACKAGES)
     juju_log('**********finished to install vsm vsm-dashboard python-vsmclient')
+    add_source(config('ceph-source'), config('ceph-key'))
+    apt_update(fatal=True)
+    apt_install(packages=PRE_INSTALL_PACKAGES, fatal=True)
+
 
 @hooks.hook('shared-db-relation-joined')
 def db_joined():
@@ -96,6 +103,7 @@ def db_changed():
     juju_log('**********CONFIGS is %s' % str(CONFIGS))
     CONFIGS.write(VSM_CONF)
     migrate_database()
+    config_vsm_controller()
 
 
 @hooks.hook('amqp-relation-joined')
@@ -115,6 +123,7 @@ def amqp_changed():
         return
     juju_log('**********CONFIGS is %s' % str(CONFIGS))
     CONFIGS.write(VSM_CONF)
+    config_vsm_controller()
 
 
 @hooks.hook('identity-service-relation-joined')
@@ -162,6 +171,7 @@ def identity_changed():
     juju_log('**********CONFIGS.write(VSM_CONF)')
     juju_log('**********CONFIGS is %s' % str(CONFIGS))
     CONFIGS.write(VSM_CONF)
+    config_vsm_controller()
 
 
 @hooks.hook('vsm-agent-relation-joined')
@@ -190,6 +200,29 @@ def _auth_config():
         'admin_password': auth_token_config('admin_password')
     }
     return cfg
+
+def config_vsm_controller():
+    if 'shared-db' in CONFIGS.complete_contexts() and \
+        'amqp' in CONFIGS.complete_contexts() and \
+        'identity-service' in CONFIGS.complete_contexts():
+
+        service_host = auth_token_config('identity_uri').split('/')[2].split(':')[0]
+        net = '.'.join(service_host.split('.')[0:3]) + ".0\/24"
+        subprocess.check_call(['sudo', 'sed', '-i', 's/^192.168.*/%s/g' % net,
+                               '/etc/manifest/cluster.manifest'])
+        keystone_vsm_service_password = auth_token_config('admin_password')
+        subprocess.check_call(['sudo', 'sed', '-i',
+                               's/^KEYSTONE_VSM_SERVICE_PASSWORD =*.*/KEYSTONE_VSM_SERVICE_PASSWORD = %s/g' % keystone_vsm_service_password,
+                               '/etc/vsm-dashboard/local_settings'])
+        subprocess.check_call(['sudo', 'sed', '-i', 's/^OPENSTACK_HOST =*.*/OPENSTACK_HOST = %s/g' % service_host,
+                               '/etc/vsm-dashboard/local_settings'])
+        subprocess.check_call(['sudo', 'sed', '-i', 's/^OPENSTACK_KEYSTONE_DEFAULT_ROLE =*.*/OPENSTACK_KEYSTONE_DEFAULT_ROLE = "_member"/g'
+                               '/etc/vsm-dashboard/local_settings'])
+
+        subprocess.check_call(['sudo', 'service', 'vsm-api', 'restart'])
+        subprocess.check_call(['sudo', 'service', 'vsm-scheduler', 'restart'])
+        subprocess.check_call(['sudo', 'service', 'vsm-conductor', 'restart'])
+        subprocess.check_call(['sudo', 'service', 'apache2', 'restart'])
 
 
 if __name__ == '__main__':

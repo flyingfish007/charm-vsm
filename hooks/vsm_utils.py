@@ -24,9 +24,16 @@ VSM_CONF = '%s/vsm.conf' % VSM_CONF_DIR
 PACKAGE_VSM = 'vsm'
 PACKAGE_VSM_DASHBOARD = 'vsm-dashboard'
 PACKAGE_PYTHON_VSMCLIENT = 'python-vsmclient'
+PACKAGE_VSM_DEPLOY = 'vsm-deploy'
 VSM_PACKAGES = [PACKAGE_VSM,
                 PACKAGE_VSM_DASHBOARD,
-                PACKAGE_PYTHON_VSMCLIENT]
+                PACKAGE_PYTHON_VSMCLIENT,
+                PACKAGE_VSM_DEPLOY]
+PRE_INSTALL_PACKAGES = ['ceph', 'ceph-mds', 'librbd1', 'rbd-fuse',
+                        'radosgw', 'apache2', 'libapache2-mod-wsgi',
+                        'libapache2-mod-fastcgi', 'memcached', 'mariadb-server',
+                        'ntp', 'openssh-server', 'openssl', 'keystone',
+                        'expect', 'smartmontools']
 
 
 BASE_RESOURCE_MAP = OrderedDict([
