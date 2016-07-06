@@ -216,7 +216,7 @@ def config_vsm_controller():
                                '/etc/vsm-dashboard/local_settings'])
         subprocess.check_call(['sudo', 'sed', '-i', 's/^OPENSTACK_HOST =*.*/OPENSTACK_HOST = %s/g' % service_host,
                                '/etc/vsm-dashboard/local_settings'])
-        subprocess.check_call(['sudo', 'sed', '-i', 's/^OPENSTACK_KEYSTONE_DEFAULT_ROLE =*.*/OPENSTACK_KEYSTONE_DEFAULT_ROLE = "_member"/g'
+        subprocess.check_call(['sudo', 'sed', '-i', 's/^OPENSTACK_KEYSTONE_DEFAULT_ROLE =*.*/OPENSTACK_KEYSTONE_DEFAULT_ROLE = "_member"/g',
                                '/etc/vsm-dashboard/local_settings'])
 
         subprocess.check_call(['sudo', 'service', 'vsm-api', 'restart'])
