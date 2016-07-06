@@ -14,12 +14,17 @@ from vsm_utils import (
 )
 
 from charmhelpers.core.hookenv import (
+    charm_dir,
     config,
     network_get_primary_address,
     relation_set,
     unit_get,
     UnregisteredHookError,
     Hooks
+)
+
+from charmhelpers.core.host import (
+    rsync
 )
 
 from charmhelpers.contrib.openstack.ip import (
@@ -42,6 +47,26 @@ CONFIGS = register_configs()
 @hooks.hook('install.real')
 def install():
     juju_log('**********install.real')
+    rsync(
+        charm_dir() + '/packages/vsm-dep-repo',
+        '/opt'
+    )
+    rsync(
+        charm_dir() + '/packages/vsmrepo',
+        '/opt'
+    )
+    rsync(
+        charm_dir() + '/files/apt.conf',
+        '/etc/apt'
+    )
+    rsync(
+        charm_dir() + '/files/vsm.list',
+        '/etc/apt/sources.list.d'
+    )
+    rsync(
+        charm_dir() + '/files/vsm-dep.list',
+        '/etc/apt/sources.list.d'
+    )
     apt_update()
     apt_install(VSM_PACKAGES)
     juju_log('**********finished to install vsm vsm-dashboard python-vsmclient')
