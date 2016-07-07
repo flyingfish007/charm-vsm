@@ -219,6 +219,11 @@ def config_vsm_controller():
                                '/etc/vsm-dashboard/local_settings'])
         subprocess.check_call(['sudo', 'sed', '-i', 's/^OPENSTACK_KEYSTONE_DEFAULT_ROLE =*.*/OPENSTACK_KEYSTONE_DEFAULT_ROLE = "_member"/g',
                                '/etc/vsm-dashboard/local_settings'])
+        rsync(
+            charm_dir() + '/scripts/https',
+            '/tmp/https'
+        )
+        subprocess.check_call(['sudo', 'bash', '/tmp/https'])
 
         subprocess.check_call(['sudo', 'service', 'vsm-api', 'restart'])
         subprocess.check_call(['sudo', 'service', 'vsm-scheduler', 'restart'])
