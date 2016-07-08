@@ -212,12 +212,21 @@ def config_vsm_controller():
         subprocess.check_call(['sudo', 'sed', '-i', 's/^192.168.*/%s/g' % net,
                                '/etc/manifest/cluster.manifest'])
         keystone_vsm_service_password = auth_token_config('admin_password')
+
+        rsync(
+            charm_dir() + '/scripts/local_settings.template',
+            '/usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.py'
+        )
+        subprocess.check_call(['sudo', 'rm', '-rf', '/etc/vsm-dashboard/local_settings'])
+        subprocess.check_call(['sudo', 'ln', '-sf',
+                               '/usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.py',
+                               '/etc/vsm-dashboard/local_settings'])
         subprocess.check_call(['sudo', 'sed', '-i',
-                               's/^KEYSTONE_VSM_SERVICE_PASSWORD =*.*/KEYSTONE_VSM_SERVICE_PASSWORD = %s/g' % keystone_vsm_service_password,
+                               's/^KEYSTONE_VSM_SERVICE_PASSWORD =*.*/KEYSTONE_VSM_SERVICE_PASSWORD = "%s"/g' % keystone_vsm_service_password,
                                '/etc/vsm-dashboard/local_settings'])
-        subprocess.check_call(['sudo', 'sed', '-i', 's/^OPENSTACK_HOST =*.*/OPENSTACK_HOST = %s/g' % service_host,
+        subprocess.check_call(['sudo', 'sed', '-i', 's/^OPENSTACK_HOST =*.*/OPENSTACK_HOST = "%s"/g' % service_host,
                                '/etc/vsm-dashboard/local_settings'])
-        subprocess.check_call(['sudo', 'sed', '-i', 's/^OPENSTACK_KEYSTONE_DEFAULT_ROLE =*.*/OPENSTACK_KEYSTONE_DEFAULT_ROLE = "_member"/g',
+        subprocess.check_call(['sudo', 'sed', '-i', 's/^OPENSTACK_KEYSTONE_DEFAULT_ROLE =*.*/OPENSTACK_KEYSTONE_DEFAULT_ROLE = "_member_"/g',
                                '/etc/vsm-dashboard/local_settings'])
         rsync(
             charm_dir() + '/scripts/https',
