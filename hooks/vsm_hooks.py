@@ -220,7 +220,7 @@ def config_vsm_controller():
                                '/usr/share/vsm-dashboard/vsm_dashboard/api/vsm.py'])
         keystone_vsm_service_password = auth_token_config('admin_password')
         rsync(
-            charm_dir() + '/scripts/local_settings.template',
+            charm_dir() + '/files/local_settings.template',
             '/usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.py'
         )
         subprocess.check_call(['sudo', 'rm', '-rf', '/etc/vsm-dashboard/local_settings'])
