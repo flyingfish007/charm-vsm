@@ -216,7 +216,7 @@ def config_vsm_controller():
         subprocess.check_call(['sudo', 'service', 'vsm-conductor', 'restart'])
 
         # TODO fix the hardcode of vsm-dashboard.
-        subprocess.check_call(['sudo', 'sed', '-i', "s/service/services/g",
+        subprocess.check_call(['sudo', 'sed', '-i', "s/'service'/'services'/g",
                                '/usr/share/vsm-dashboard/vsm_dashboard/api/vsm.py'])
         keystone_vsm_service_password = auth_token_config('admin_password')
         rsync(
