@@ -211,8 +211,11 @@ def config_vsm_controller():
         net = '.'.join(service_host.split('.')[0:3]) + ".0\/24"
         subprocess.check_call(['sudo', 'sed', '-i', 's/^192.168.*/%s/g' % net,
                                '/etc/manifest/cluster.manifest'])
-        keystone_vsm_service_password = auth_token_config('admin_password')
+        subprocess.check_call(['sudo', 'service', 'vsm-api', 'restart'])
+        subprocess.check_call(['sudo', 'service', 'vsm-scheduler', 'restart'])
+        subprocess.check_call(['sudo', 'service', 'vsm-conductor', 'restart'])
 
+        keystone_vsm_service_password = auth_token_config('admin_password')
         rsync(
             charm_dir() + '/scripts/local_settings.template',
             '/usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.py'
@@ -233,12 +236,9 @@ def config_vsm_controller():
             '/tmp/https'
         )
         subprocess.check_call(['sudo', 'bash', '/tmp/https'])
-
-        subprocess.check_call(['sudo', 'service', 'vsm-api', 'restart'])
-        subprocess.check_call(['sudo', 'service', 'vsm-scheduler', 'restart'])
-        subprocess.check_call(['sudo', 'service', 'vsm-conductor', 'restart'])
         subprocess.check_call(['sudo', 'service', 'apache2', 'restart'])
         open_port('443')
+        open_port('80')
 
 
 if __name__ == '__main__':
