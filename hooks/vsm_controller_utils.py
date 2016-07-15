@@ -104,7 +104,7 @@ def service_enabled(service):
     return service in enabled
 
 def juju_log(msg):
-    log('[vsm] %s' % msg)
+    log('[vsm-controller] %s' % msg)
 
 # TODO: refactor to use unit storage or related data
 def auth_token_config(setting):
