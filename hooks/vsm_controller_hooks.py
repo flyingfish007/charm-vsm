@@ -80,7 +80,7 @@ def install():
 
 
 @hooks.hook('shared-db-relation-joined')
-def db_joined():
+def db_joined(relation_id=None):
     juju_log('**********shared-db-relation-joined')
     try:
         # NOTE: try to use network spaces
@@ -89,9 +89,10 @@ def db_joined():
         # NOTE: fallback to private-address
         host = unit_get('private-address')
     conf = config()
-    relation_set(database=conf['database'],
-                 username=conf['database-user'],
-                 hostname=host)
+    relation_set(vsm_database=conf['database'],
+                 vsm_username=conf['database-user'],
+                 vsm_hostname=host,
+                 relation_id=relation_id)
 
 
 @hooks.hook('shared-db-relation-changed')
