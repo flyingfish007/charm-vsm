@@ -89,9 +89,9 @@ def db_joined(relation_id=None):
         # NOTE: fallback to private-address
         host = unit_get('private-address')
     conf = config()
-    relation_set(vsm_database=conf['database'],
-                 vsm_username=conf['database-user'],
-                 vsm_hostname=host,
+    relation_set(database=conf['database'],
+                 username=conf['database-user'],
+                 hostname=host,
                  relation_id=relation_id)
 
 
