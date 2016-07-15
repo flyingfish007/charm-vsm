@@ -4,7 +4,7 @@ import sys
 import subprocess
 import utils
 
-from vsm_utils import (
+from vsm_controller_utils import (
     auth_token_config,
     juju_log,
     migrate_database,
@@ -224,7 +224,7 @@ def config_vsm_controller():
             '/usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.py'
         )
         subprocess.check_call(['sudo', 'rm', '-rf', '/etc/vsm-dashboard/local_settings'])
-        subprocess.check_call(['sudo', 'ln', '-sf',
+        subprocess.check_call(['sudo', 'ln', '-s',
                                '/usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.py',
                                '/etc/vsm-dashboard/local_settings'])
         subprocess.check_call(['sudo', 'sed', '-i',
