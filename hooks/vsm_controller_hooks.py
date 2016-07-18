@@ -217,6 +217,7 @@ def keystone_agent_settings():
     ks_auth_config = _auth_config()
     rel_settings = {}
     rel_settings.update(ks_auth_config)
+    juju_log("rel_settings is %s" % str(rel_settings))
     return rel_settings
 
 def _auth_config():
@@ -226,6 +227,7 @@ def _auth_config():
         'admin_user': auth_token_config('admin_user'),
         'admin_password': auth_token_config('admin_password')
     }
+    juju_log("cfg is %s" % str(cfg))
     return cfg
 
 def config_vsm_controller():
