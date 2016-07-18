@@ -10,6 +10,9 @@ from vsm_controller_utils import (
     migrate_database,
     register_configs,
     service_enabled,
+    ssh_agent_add,
+    ssh_authorized_keys_lines,
+    ssh_known_hosts_lines,
     PRE_INSTALL_PACKAGES,
     VSM_PACKAGES,
     VSM_CONF
@@ -20,6 +23,7 @@ from charmhelpers.core.hookenv import (
     config,
     network_get_primary_address,
     open_port,
+    relation_get,
     relation_set,
     unit_get,
     UnregisteredHookError,
@@ -184,8 +188,26 @@ def agent_joined(rid=None):
 
 
 @hooks.hook('vsm-agent-relation-changed')
-def agent_changed():
-    return
+def agent_changed(rid=None, unit=None):
+    rel_settings = relation_get(rid=rid, unit=unit)
+    key = rel_settings.get('ssh_public_key')
+    ssh_agent_add(key, rid=rid, unit=unit)
+    index = 0
+    for line in ssh_known_hosts_lines(unit=unit):
+        relation_set(
+            relation_id=rid,
+            relation_settings={
+                'known_hosts_{}'.format(index): line})
+        index += 1
+    relation_set(relation_id=rid, known_hosts_max_index=index)
+    index = 0
+    for line in ssh_authorized_keys_lines(unit=unit):
+        relation_set(
+            relation_id=rid,
+            relation_settings={
+                'authorized_keys_{}'.format(index): line})
+        index += 1
+    relation_set(relation_id=rid, authorized_keys_max_index=index)
 
 
 def keystone_agent_settings():
