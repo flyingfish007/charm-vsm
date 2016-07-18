@@ -191,6 +191,9 @@ def agent_joined(rid=None):
 def agent_changed(rid=None, unit=None):
     rel_settings = relation_get(rid=rid, unit=unit)
     key = rel_settings.get('ssh_public_key')
+    if not key:
+        juju_log('peer did not publish key?')
+        return
     ssh_agent_add(key, rid=rid, unit=unit)
     index = 0
     for line in ssh_known_hosts_lines(unit=unit):
