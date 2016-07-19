@@ -5,6 +5,7 @@ import subprocess
 import utils
 
 from vsm_controller_utils import (
+    add_known_host,
     auth_token_config,
     initialize_ssh_keys,
     juju_log,
@@ -12,9 +13,6 @@ from vsm_controller_utils import (
     public_ssh_key,
     register_configs,
     service_enabled,
-    ssh_agent_add,
-    ssh_authorized_keys_lines,
-    ssh_known_hosts_lines,
     PRE_INSTALL_PACKAGES,
     VSM_PACKAGES,
     VSM_CONF
@@ -195,52 +193,41 @@ def agent_joined(relation_id=None):
         'hostname': get_hostname(host),
         'hostaddress': get_host_ip(host)
     }
+
+    keystone_host = auth_token_config('identity_uri').split('/')[2].split(':')[0]
+    admin_tenant_name = auth_token_config('admin_tenant_name')
+    admin_user = auth_token_config('admin_user')
+    admin_password = auth_token_config('admin_password')
+    args = ['agent-token', admin_tenant_name, admin_user, admin_password, keystone_host]
+    token_tenant = subprocess.check_output(args).strip('\n')
+    settings['token_tenant'] = token_tenant
+
     settings['ssh_public_key'] = public_ssh_key()
     relation_set(relation_id=relation_id, **settings)
 
 
-# @hooks.hook('vsm-agent-relation-changed')
-# def agent_changed(rid=None, unit=None):
-#     rel_settings = relation_get(rid=rid, unit=unit)
-#     key = rel_settings.get('ssh_public_key')
-#     if not key:
-#         juju_log('peer did not publish key?')
-#         return
-#     ssh_agent_add(key, rid=rid, unit=unit)
-#     index = 0
-#     for line in ssh_known_hosts_lines(unit=unit):
-#         relation_set(
-#             relation_id=rid,
-#             relation_settings={
-#                 'known_hosts_{}'.format(index): line})
-#         index += 1
-#     relation_set(relation_id=rid, known_hosts_max_index=index)
-#     index = 0
-#     for line in ssh_authorized_keys_lines(unit=unit):
-#         relation_set(
-#             relation_id=rid,
-#             relation_settings={
-#                 'authorized_keys_{}'.format(index): line})
-#         index += 1
-#     relation_set(relation_id=rid, authorized_keys_max_index=index)
+@hooks.hook('vsm-agent-relation-changed')
+def agent_changed(rid=None, unit=None):
+    if 'shared-db' not in CONFIGS.complete_contexts():
+        juju_log('shared-db relation incomplete. Peer not ready?')
+        return
+    if 'amqp' not in CONFIGS.complete_contexts():
+        juju_log('amqp relation incomplete. Peer not ready?')
+        return
+    if 'identity-service' not in CONFIGS.complete_contexts():
+        juju_log('identity-service relation incomplete. Peer not ready?')
+        return
 
+    rel_settings = relation_get(rid=rid, unit=unit)
+    agent_hostname = rel_settings.get('host')
+    agent_hostaddress = rel_settings.get('hostaddress')
+    host = unit_get('private-address')
+    hostname = get_hostname(host)
+    hostaddress = get_host_ip(host)
+    hosts = [agent_hostname, hostname, agent_hostaddress, hostaddress]
+    for host in hosts:
+        add_known_host(host, unit=unit, user='root')
 
-def keystone_agent_settings():
-    ks_auth_config = _auth_config()
-    rel_settings = {}
-    rel_settings.update(ks_auth_config)
-    juju_log("rel_settings is %s" % str(rel_settings))
-    return rel_settings
-
-def _auth_config():
-    '''Grab all KS auth token config from vsm.conf, or return empty {}'''
-    cfg = {
-        'service_host': auth_token_config('identity_uri').split('/')[2].split(':')[0],
-        'admin_user': auth_token_config('admin_user'),
-        'admin_password': auth_token_config('admin_password')
-    }
-    juju_log("cfg is %s" % str(cfg))
-    return cfg
 
 def config_vsm_controller():
     if 'shared-db' in CONFIGS.complete_contexts() and \
