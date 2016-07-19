@@ -3,9 +3,7 @@ from collections import OrderedDict
 import os
 import pwd
 import subprocess
-from subprocess import (
-    check_output
-)
+from subprocess import check_output
 import ConfigParser
 
 from charmhelpers.contrib.network.ip import (
@@ -67,7 +65,7 @@ BASE_RESOURCE_MAP = OrderedDict([
 ])
 
 
-def register_configs(release=None):
+def register_configs():
     """Register config files with their respective contexts.
     Regstration of some configs may not be required depending on
     existing of certain relations.
@@ -82,31 +80,24 @@ def register_configs(release=None):
         configs.register(cfg, rscs['contexts'])
     return configs
 
-def resource_map(release=None):
+
+def resource_map():
     """
     Dynamically generate a map of resources that will be managed for a single
     hook execution.
     """
-    resource_map = deepcopy(BASE_RESOURCE_MAP)
-    return resource_map
+    r_map = deepcopy(BASE_RESOURCE_MAP)
+    return r_map
 
-def restart_map():
-    '''Determine the correct resource map to be passed to
-    charmhelpers.core.restart_on_change() based on the services configured.
-
-    :returns: dict: A dictionary mapping config file to lists of services
-                    that should be restarted when file changes.
-    '''
-    return OrderedDict([(cfg, ['vsm-api', 'vsm-scheduler', 'vsm-conductor'])
-                        for cfg, v in resource_map().iteritems()])
 
 # NOTE(jamespage): Retry deals with sync issues during one-shot HA deploys.
 #                  mysql might be restarting or suchlike.
 @retry_on_exception(5, base_delay=3, exc_type=subprocess.CalledProcessError)
 def migrate_database():
-    'Runs cinder-manage to initialize a new database or migrate existing'
+    'Runs vsm-manage to initialize a new database or migrate existing'
     cmd = ['vsm-manage', 'db', 'sync']
     subprocess.check_call(cmd)
+
 
 def service_enabled(service):
     '''Determine if a specific cinder service is enabled in
@@ -122,10 +113,11 @@ def service_enabled(service):
         return True
     return service in enabled
 
+
 def juju_log(msg):
     log('[vsm-controller] %s' % msg)
 
-# TODO: refactor to use unit storage or related data
+
 def auth_token_config(setting):
     """
     Returns currently configured value for setting in vsm.conf's
@@ -141,32 +133,6 @@ def auth_token_config(setting):
         return None
     return value
 
-def ssh_agent_add(public_key, rid=None, unit=None, user=None):
-    # If remote compute node hands us a hostname, ensure we have a
-    # known hosts entry for its IP, hostname and FQDN.
-    private_address = relation_get(rid=rid, unit=unit,
-                                   attribute='private-address')
-    hosts = [private_address]
-
-    if not is_ipv6(private_address):
-        if relation_get('hostname'):
-            hosts.append(relation_get('hostname'))
-
-        if not is_ip(private_address):
-            hosts.append(get_host_ip(private_address))
-            hosts.append(private_address.split('.')[0])
-        else:
-            hn = get_hostname(private_address)
-            hosts.append(hn)
-            hosts.append(hn.split('.')[0])
-
-    for host in list(set(hosts)):
-        add_known_host(host, unit, user)
-
-    if not ssh_authorized_key_exists(public_key, unit, user):
-        log('Saving SSH authorized key for compute host at %s.' %
-            private_address)
-        add_authorized_key(public_key, unit, user)
 
 def add_known_host(host, unit=None, user=None):
     '''Add variations of host to a known hosts file.'''
@@ -189,6 +155,7 @@ def add_known_host(host, unit=None, user=None):
     with open(known_hosts(unit, user), 'a') as out:
         out.write(remote_key + '\n')
 
+
 def ssh_known_host_key(host, unit=None, user=None):
     cmd = ['ssh-keygen', '-f', known_hosts(unit, user), '-H', '-F', host]
     try:
@@ -206,8 +173,10 @@ def ssh_known_host_key(host, unit=None, user=None):
 
     return None
 
+
 def known_hosts(unit=None, user=None):
     return os.path.join(ssh_directory_for_unit(unit, user), 'known_hosts')
+
 
 def ssh_directory_for_unit(unit=None, user=None):
     if unit:
@@ -226,6 +195,7 @@ def ssh_directory_for_unit(unit=None, user=None):
             open(f, 'w').close()
     return _dir
 
+
 def is_same_key(key_1, key_2):
     # The key format get will be like '|1|2rUumCavEXWVaVyB5uMl6m85pZo=|Cp'
     # 'EL6l7VTY37T/fg/ihhNb/GPgs= ssh-rsa AAAAB', we only need to compare
@@ -235,39 +205,16 @@ def is_same_key(key_1, key_2):
     k_2 = key_2.split('= ')[1]
     return k_1 == k_2
 
+
 def remove_known_host(host, unit=None, user=None):
     log('Removing SSH known host entry for compute host at %s' % host)
     cmd = ['ssh-keygen', '-f', known_hosts(unit, user), '-R', host]
     subprocess.check_call(cmd)
 
-def ssh_authorized_key_exists(public_key, unit=None, user=None):
-    with open(authorized_keys(unit, user)) as keys:
-        return (' %s ' % public_key) in keys.read()
 
 def authorized_keys(unit=None, user=None):
     return os.path.join(ssh_directory_for_unit(unit, user), 'authorized_keys')
 
-def add_authorized_key(public_key, unit=None, user=None):
-    with open(authorized_keys(unit, user), 'a') as keys:
-        keys.write(public_key + '\n')
-
-def ssh_known_hosts_lines(unit=None, user=None):
-    known_hosts_list = []
-
-    with open(known_hosts(unit, user)) as hosts:
-        for hosts_line in hosts:
-            if hosts_line.rstrip():
-                known_hosts_list.append(hosts_line.rstrip())
-    return(known_hosts_list)
-
-def ssh_authorized_keys_lines(unit=None, user=None):
-    authorized_keys_list = []
-
-    with open(authorized_keys(unit, user)) as keys:
-        for authkey_line in keys:
-            if authkey_line.rstrip():
-                authorized_keys_list.append(authkey_line.rstrip())
-    return(authorized_keys_list)
 
 def initialize_ssh_keys(user='root'):
     home_dir = pwd.getpwnam(user).pw_dir
@@ -290,6 +237,7 @@ def initialize_ssh_keys(user='root'):
         with open(pub_key, 'wb') as out:
             out.write(p)
     check_output(['chown', '-R', user, ssh_dir])
+
 
 def public_ssh_key(user='root'):
     home = pwd.getpwnam(user).pw_dir
