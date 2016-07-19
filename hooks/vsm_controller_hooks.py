@@ -6,8 +6,10 @@ import utils
 
 from vsm_controller_utils import (
     auth_token_config,
+    initialize_ssh_keys,
     juju_log,
     migrate_database,
+    public_ssh_key,
     register_configs,
     service_enabled,
     ssh_agent_add,
@@ -39,6 +41,11 @@ from charmhelpers.contrib.openstack.ip import (
     ADMIN,
     INTERNAL,
     PUBLIC
+)
+
+from charmhelpers.contrib.openstack.utils import (
+    get_host_ip,
+    get_hostname
 )
 
 from charmhelpers.fetch import (
@@ -181,36 +188,41 @@ def identity_changed():
 
 
 @hooks.hook('vsm-agent-relation-joined')
-def agent_joined(rid=None):
-    rel_settings = {}
-    rel_settings.update(keystone_agent_settings())
-    relation_set(relation_id=rid, **rel_settings)
+def agent_joined(relation_id=None):
+    initialize_ssh_keys()
+    host = unit_get('private-address')
+    settings = {
+        'hostname': get_hostname(host),
+        'hostaddress': get_host_ip(host)
+    }
+    settings['ssh_public_key'] = public_ssh_key()
+    relation_set(relation_id=relation_id, **settings)
 
 
-@hooks.hook('vsm-agent-relation-changed')
-def agent_changed(rid=None, unit=None):
-    rel_settings = relation_get(rid=rid, unit=unit)
-    key = rel_settings.get('ssh_public_key')
-    if not key:
-        juju_log('peer did not publish key?')
-        return
-    ssh_agent_add(key, rid=rid, unit=unit)
-    index = 0
-    for line in ssh_known_hosts_lines(unit=unit):
-        relation_set(
-            relation_id=rid,
-            relation_settings={
-                'known_hosts_{}'.format(index): line})
-        index += 1
-    relation_set(relation_id=rid, known_hosts_max_index=index)
-    index = 0
-    for line in ssh_authorized_keys_lines(unit=unit):
-        relation_set(
-            relation_id=rid,
-            relation_settings={
-                'authorized_keys_{}'.format(index): line})
-        index += 1
-    relation_set(relation_id=rid, authorized_keys_max_index=index)
+# @hooks.hook('vsm-agent-relation-changed')
+# def agent_changed(rid=None, unit=None):
+#     rel_settings = relation_get(rid=rid, unit=unit)
+#     key = rel_settings.get('ssh_public_key')
+#     if not key:
+#         juju_log('peer did not publish key?')
+#         return
+#     ssh_agent_add(key, rid=rid, unit=unit)
+#     index = 0
+#     for line in ssh_known_hosts_lines(unit=unit):
+#         relation_set(
+#             relation_id=rid,
+#             relation_settings={
+#                 'known_hosts_{}'.format(index): line})
+#         index += 1
+#     relation_set(relation_id=rid, known_hosts_max_index=index)
+#     index = 0
+#     for line in ssh_authorized_keys_lines(unit=unit):
+#         relation_set(
+#             relation_id=rid,
+#             relation_settings={
+#                 'authorized_keys_{}'.format(index): line})
+#         index += 1
+#     relation_set(relation_id=rid, authorized_keys_max_index=index)
 
 
 def keystone_agent_settings():

@@ -1,7 +1,11 @@
 from copy import deepcopy
 from collections import OrderedDict
 import os
+import pwd
 import subprocess
+from subprocess import (
+    check_output
+)
 import ConfigParser
 
 from charmhelpers.contrib.network.ip import (
@@ -264,3 +268,33 @@ def ssh_authorized_keys_lines(unit=None, user=None):
             if authkey_line.rstrip():
                 authorized_keys_list.append(authkey_line.rstrip())
     return(authorized_keys_list)
+
+def initialize_ssh_keys(user='root'):
+    home_dir = pwd.getpwnam(user).pw_dir
+    ssh_dir = os.path.join(home_dir, '.ssh')
+    if not os.path.isdir(ssh_dir):
+        os.mkdir(ssh_dir)
+
+    priv_key = os.path.join(ssh_dir, 'id_rsa')
+    if not os.path.isfile(priv_key):
+        log('Generating new ssh key for user %s.' % user)
+        cmd = ['ssh-keygen', '-q', '-N', '', '-t', 'rsa', '-b', '2048',
+               '-f', priv_key]
+        check_output(cmd)
+
+    pub_key = '%s.pub' % priv_key
+    if not os.path.isfile(pub_key):
+        log('Generating missing ssh public key @ %s.' % pub_key)
+        cmd = ['ssh-keygen', '-y', '-f', priv_key]
+        p = check_output(cmd).strip()
+        with open(pub_key, 'wb') as out:
+            out.write(p)
+    check_output(['chown', '-R', user, ssh_dir])
+
+def public_ssh_key(user='root'):
+    home = pwd.getpwnam(user).pw_dir
+    try:
+        with open(os.path.join(home, '.ssh', 'id_rsa.pub')) as key:
+            return key.read().strip()
+    except:
+        return None
