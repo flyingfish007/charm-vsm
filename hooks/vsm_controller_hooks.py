@@ -219,7 +219,7 @@ def agent_changed(rid=None, unit=None):
         return
 
     rel_settings = relation_get(rid=rid, unit=unit)
-    agent_hostname = rel_settings.get('host')
+    agent_hostname = rel_settings.get('hostname')
     agent_hostaddress = rel_settings.get('hostaddress')
     host = unit_get('private-address')
     hostname = get_hostname(host)
