@@ -39,10 +39,16 @@ $ juju deploy rabbitmq-server
 $ juju deploy --repository=$HOME/charms local:trusty/vsm-controller
 ```
 * you can use command 'juju debug-log' to see whether the deployment has been done. If all have been done, you must do as Notice.
-* after you do as above, you can see that.
-![pic](pic/vsm-controller1.jpg)
+* after you do as above, you can see that.  
+![pic1](pic/vsm-controller1.jpg)
+* add the relation between keystone and mysql.(If you use proxy, please run command 'juju environment unset https-proxy;juju environment unset http-proxy;juju environment unset ftp-proxy')  
+![pic2](pic/vsm-controller2.jpg)
+* add the relation between vsm-controller and mysql, vsm-controller and keystone and vsm-controller and rabbitmq-server.  
+![pic3](pic/vsm-controller3.jpg)
+* get the password of vsm from the vsm-controller node.
+* login the https://ip/dashboard
 
-------------
+---
 ### Notice(Important)
 * The charm-keystone is developed by openstack. So the valid service don't include the 'vsm'. So after you install the charm-keystone, you should change the code of it.
 * You should run "juju ssh keystone/\*", then "sudo vim /var/lib/juju/agents/unit-keystone-\*/charm/hooks/keystone_utils.py".
