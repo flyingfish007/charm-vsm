@@ -9,7 +9,7 @@ Charm of juju for Virtual-Storage-Manager(VSM) Controller.
 * You should install the juju by youself at first [juju](https://jujucharms.com/).
 
 ### Steps by Steps
-* log in as root, then create an account for juju to use.
+* login as root, then create an account for juju to use.
 ```sh
 # useradd -m -s /bin/bash testuser
 # passwd testuser
@@ -46,7 +46,7 @@ $ juju deploy --repository=$HOME/charms local:trusty/vsm-controller
 * add the relation between vsm-controller and mysql, vsm-controller and keystone and vsm-controller and rabbitmq-server.  
 ![pic3](pic/vsm-controller3.jpg)
 * get the password of vsm from the vsm-controller node.
-* login the https://ip/dashboard
+* login: https://ip/dashboard
 
 ---
 ### Notice(Important)
