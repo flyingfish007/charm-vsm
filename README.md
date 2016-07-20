@@ -8,7 +8,7 @@ Charm of juju for Virtual-Storage-Manager(VSM) Controller.
 
 ### Notice(Important)
 * The charm-keystone is developed by openstack. So the valid service don't include the 'vsm'. So after you install the charm-keystone, you should change the code of it.
-* You should run "juju ssh <keystone/*>", then "sudo vim /var/lib/juju/agents/unit-<keystone-*>/charm/hooks/keystone_utils.py".
+* You should run "juju ssh keystone/\*", then "sudo vim /var/lib/juju/agents/unit-keystone-\*/charm/hooks/keystone_utils.py".
 * Of the keystone_utils.py, you should add as followed:
 ```py
 valid_services = {
