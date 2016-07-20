@@ -38,12 +38,12 @@ $ juju deploy rabbitmq-server
 ```sh
 $ juju deploy --repository=$HOME/charms local:trusty/vsm-controller
 ```
-* you can use command 'juju debug-log' to see whether the deployment has been done. If all have been done, you must do [that](#jump)
+* you can use command 'juju debug-log' to see whether the deployment has been done. If all have been done, you must do as Notice.
 * after you do as above, you can see that.
 ![pic](pic/vsm-controller1.jpg)
 
 ------------
-<span id="jump">### Notice(Important)</span>
+### Notice(Important)
 * The charm-keystone is developed by openstack. So the valid service don't include the 'vsm'. So after you install the charm-keystone, you should change the code of it.
 * You should run "juju ssh keystone/\*", then "sudo vim /var/lib/juju/agents/unit-keystone-\*/charm/hooks/keystone_utils.py".
 * Of the keystone_utils.py, you should add as followed:
