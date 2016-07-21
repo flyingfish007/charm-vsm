@@ -90,3 +90,13 @@ options:
 
       https://vsm.example.com:443/v1/$(tenant_id)s and
       https://vsm.example.com:443/v2/$(tenant_id)s
+  known-hosts-path:
+    type: string
+    default: '{homedir}/.ssh/known_hosts'
+    description: |
+      .
+      Full path to known_hosts file.
+      .
+        homedir - user's home directory
+        username - username
+      .

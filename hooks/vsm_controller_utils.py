@@ -34,7 +34,6 @@ from charmhelpers.core.hookenv import (
 )
 
 
-VSM_SSH_DIR = '/etc/vsm/agent_ssh/'
 TEMPLATES = 'templates/'
 VSM_CONF_DIR = "/etc/vsm"
 VSM_CONF = '%s/vsm.conf' % VSM_CONF_DIR
@@ -134,7 +133,7 @@ def auth_token_config(setting):
     return value
 
 
-def add_known_host(host, unit=None, user=None):
+def add_known_host(host, unit=None, user='root'):
     '''Add variations of host to a known hosts file.'''
     cmd = ['ssh-keyscan', '-H', '-t', 'rsa', host]
     try:
@@ -152,12 +151,12 @@ def add_known_host(host, unit=None, user=None):
             remove_known_host(host, unit, user)
 
     log('Adding SSH host key to known hosts for compute node at %s.' % host)
-    with open(known_hosts(unit, user), 'a') as out:
+    with open(known_hosts(user), 'a') as out:
         out.write(remote_key + '\n')
 
 
 def ssh_known_host_key(host, unit=None, user=None):
-    cmd = ['ssh-keygen', '-f', known_hosts(unit, user), '-H', '-F', host]
+    cmd = ['ssh-keygen', '-f', known_hosts(user), '-H', '-F', host]
     try:
         # The first line of output is like '# Host xx found: line 1 type RSA',
         # which should be excluded.
@@ -174,26 +173,11 @@ def ssh_known_host_key(host, unit=None, user=None):
     return None
 
 
-def known_hosts(unit=None, user=None):
-    return os.path.join(ssh_directory_for_unit(unit, user), 'known_hosts')
-
-
-def ssh_directory_for_unit(unit=None, user=None):
-    if unit:
-        remote_service = unit.split('/')[0]
-    else:
-        remote_service = remote_unit().split('/')[0]
-    if user:
-        remote_service = "{}_{}".format(remote_service, user)
-    _dir = os.path.join(VSM_SSH_DIR, remote_service)
-    for d in [VSM_SSH_DIR, _dir]:
-        if not os.path.isdir(d):
-            os.mkdir(d)
-    for f in ['authorized_keys', 'known_hosts']:
-        f = os.path.join(_dir, f)
-        if not os.path.isfile(f):
-            open(f, 'w').close()
-    return _dir
+def known_hosts(user=None):
+    homedir = pwd.getpwnam(user).pw_dir
+    dest_auth_keys = config('known-hosts-path').format(
+        homedir=homedir, username=user)
+    return dest_auth_keys
 
 
 def is_same_key(key_1, key_2):
@@ -208,12 +192,8 @@ def is_same_key(key_1, key_2):
 
 def remove_known_host(host, unit=None, user=None):
     log('Removing SSH known host entry for compute host at %s' % host)
-    cmd = ['ssh-keygen', '-f', known_hosts(unit, user), '-R', host]
+    cmd = ['ssh-keygen', '-f', known_hosts(user), '-R', host]
     subprocess.check_call(cmd)
-
-
-def authorized_keys(unit=None, user=None):
-    return os.path.join(ssh_directory_for_unit(unit, user), 'authorized_keys')
 
 
 def initialize_ssh_keys(user='root'):
