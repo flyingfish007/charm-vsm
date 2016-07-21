@@ -218,15 +218,23 @@ def agent_changed(rid=None, unit=None):
         juju_log('identity-service relation incomplete. Peer not ready?')
         return
 
+    juju_log('**********rid is %s' % str(rid))
+    juju_log('**********unit is %s' % str(unit))
     rel_settings = relation_get(rid=rid, unit=unit)
     agent_hostname = rel_settings.get('hostname')
     agent_hostaddress = rel_settings.get('hostaddress')
+    juju_log('**********agent_hostname is %s' % agent_hostname)
+    juju_log('**********agent_hostaddress is %s' % agent_hostaddress)
     host = unit_get('private-address')
     hostname = get_hostname(host)
     hostaddress = get_host_ip(host)
+    juju_log('**********host is %s' % host)
+    juju_log('**********hostname is %s' % hostname)
+    juju_log('**********hostaddress is %s' % hostaddress)
     hosts = [agent_hostname, hostname, agent_hostaddress, hostaddress]
     for host in hosts:
-        add_known_host(host, unit=unit, user='root')
+        if host:
+            add_known_host(host, unit=unit, user='root')
 
 
 def config_vsm_controller():
