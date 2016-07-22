@@ -242,6 +242,7 @@ def config_vsm_controller():
         'amqp' in CONFIGS.complete_contexts() and \
         'identity-service' in CONFIGS.complete_contexts():
 
+        juju_log("**********config vsm controller")
         service_host = auth_token_config('identity_uri').split('/')[2].split(':')[0]
         net = '.'.join(service_host.split('.')[0:3]) + ".0\/24"
         subprocess.check_call(['sudo', 'sed', '-i', 's/^192.168.*/%s/g' % net,
